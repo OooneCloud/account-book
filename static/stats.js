@@ -51,11 +51,12 @@ async function renderPie() {
                           "#26a69a","#ffca28","#8d6e63"]
       }]
     },
-    options: {
-      plugins: {
-        title: { display: true, text: (type === "expense" ? "支出" : "收入") + "构成占比" }
-      }
+  options: {
+    maintainAspectRatio: false,   // 填满固定高度的容器,和柱状图保持等高
+    plugins: {
+      title: { display: true, text: (type === "expense" ? "支出" : "收入") + "构成占比" }
     }
+  }
   });
   return data;
 }
@@ -84,6 +85,7 @@ async function renderBar() {
       ]
     },
     options: {
+      maintainAspectRatio: false,  // 填满固定高度的容器,和环形图保持等高
       plugins: { title: { display: true, text: "每日收支对比" } },
       scales: { y: { beginAtZero: true } }
     }
@@ -129,6 +131,7 @@ async function renderTrend() {
       }))
     },
     options: {
+      maintainAspectRatio: false,   // 与另外两张图统一等高风格
       plugins: { title: { display: true, text: `${startStr} ~ ${endStr} 收支趋势` } },
       scales: {
         x: { ticks: { maxTicksLimit: 10, autoSkip: true } },
