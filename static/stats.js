@@ -2,6 +2,7 @@
 // 数据全部来自李莹莹的 /api/stats 接口:
 //   环形图  /api/stats?group=category&type=expense (+筛选条件)
 //   柱状图  /api/stats?group=date&type=expense / type=income (红绿两根柱)
+//   折线图  同柱状图口径,补零成连续时间轴(默认最近30天)
 // 明细表与统计口径一致,占比 = 该项金额 / 总金额
 
 const charts = {};   // 保存图表实例,刷新前销毁旧图避免叠加
@@ -91,6 +92,54 @@ async function renderBar() {
   });
 }
 
+// 收支趋势折线图:横轴为日期(默认最近30天,筛选了起止日期则跟随筛选范围),
+// 无记录的日期补0,保证曲线连续;类型筛选决定画哪条线
+async function renderTrend() {
+  const type = document.getElementById("type").value;
+  const day = 24 * 60 * 60 * 1000;
+  const endStr = document.getElementById("end").value
+    || new Date().toLocaleDateString("sv-SE");            // sv-SE 直接得到 YYYY-MM-DD
+  const startStr = document.getElementById("start").value
+    || new Date(Date.parse(endStr) - 29 * day).toLocaleDateString("sv-SE");
+
+  const days = Math.max(1, Math.round((Date.parse(endStr) - Date.parse(startStr)) / day) + 1);
+  const dates = Array.from({ length: days }, (_, i) =>
+    new Date(Date.parse(startStr) + i * day).toLocaleDateString("sv-SE"));
+
+  const series = {};
+  const types = type === "all" ? ["expense", "income"] : [type];
+  await Promise.all(types.map(async t => {
+    const data = await fetchStats({ group: "date", type: t });
+    const byDate = new Map(data.items.map(x => [x.key, x.total]));
+    series[t] = dates.map(d => byDate.get(d) || 0);       // 缺数据的日期补0
+  }));
+
+  const palette = { expense: "#ef5350", income: "#66bb6a" };
+  const names = { expense: "支出", income: "收入" };
+  if (charts.trend) charts.trend.destroy();
+  charts.trend = new Chart(document.getElementById("trend"), {
+    type: "line",
+    data: {
+      labels: dates,
+      datasets: types.map(t => ({
+        label: names[t],
+        data: series[t],
+        borderColor: palette[t],
+        backgroundColor: palette[t],
+        tension: 0.3,
+        pointRadius: 2
+      }))
+    },
+    options: {
+      plugins: { title: { display: true, text: `${startStr} ~ ${endStr} 收支趋势` } },
+      scales: {
+        x: { ticks: { maxTicksLimit: 10, autoSkip: true } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
 // 明细表:类别/日期、金额、笔数、占比
 function renderTable(data) {
   const tbody = document.getElementById("stat-tbody");
@@ -116,11 +165,12 @@ function typeLabel() {
   return { all: "全部类型", expense: "支出", income: "收入" }[document.getElementById("type").value];
 }
 
-// 主刷新:三块内容并行更新
+// 主刷新:四块内容并行更新
 async function refreshAll() {
   const pieData = await renderPie();
   renderTable(pieData);   // 明细表与环形图同口径
   await renderBar();
+  await renderTrend();
 }
 
 // 页面初始化 + 筛选条件变化自动刷新

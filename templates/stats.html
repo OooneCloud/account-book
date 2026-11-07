@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- stats.html — 前端统计页(成员F 王清源)
-     筛选栏 + 两张 Chart.js 图表(类别占比环形图 / 每日收支对比柱状图)+ 明细表 -->
+     筛选栏 + 三张 Chart.js 图表(类别占比环形图 / 每日收支对比柱状图 / 收支趋势折线图)+ 明细表 -->
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
@@ -76,6 +76,12 @@
       <div class="card shadow-sm h-100"><div class="card-body chart-card">
         <div class="chart-box"><canvas id="bar"></canvas></div>
       </div></div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm my-4">
+    <div class="card-body">
+      <canvas id="trend" width="900" height="260"></canvas>
     </div>
   </div>
 
