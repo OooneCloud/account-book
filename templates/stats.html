@@ -6,6 +6,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>统计 - 轻松记账本</title>
+  <script>
+    document.documentElement.setAttribute("data-bs-theme", localStorage.getItem("theme") || "light");
+  </script>
   <link href="/static/vendor/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -13,9 +16,10 @@
 <nav class="navbar navbar-expand navbar-dark bg-success mb-4">
   <div class="container">
     <span class="navbar-brand mb-0 h1">📒 轻松记账本</span>
-    <ul class="navbar-nav flex-row gap-3">
+    <ul class="navbar-nav flex-row gap-3 align-items-center">
       <li class="nav-item"><a class="nav-link" href="/">记账</a></li>
       <li class="nav-item"><a class="nav-link active" href="/stats">统计</a></li>
+      <li class="nav-item"><button class="theme-btn" id="theme-btn" title="切换暗色模式">🌙</button></li>
     </ul>
   </div>
 </nav>
@@ -26,11 +30,17 @@
     <div class="card-body row g-2 align-items-end">
       <div class="col-6 col-md-2">
         <label class="form-label">开始日期</label>
-        <input type="date" class="form-control" id="start">
+        <div class="date-wrap empty">
+          <input type="date" class="form-control" id="start">
+          <span class="date-placeholder">年/月/日</span>
+        </div>
       </div>
       <div class="col-6 col-md-2">
         <label class="form-label">结束日期</label>
-        <input type="date" class="form-control" id="end">
+        <div class="date-wrap empty">
+          <input type="date" class="form-control" id="end">
+          <span class="date-placeholder">年/月/日</span>
+        </div>
       </div>
       <div class="col-6 col-md-2">
         <label class="form-label">类型</label>
@@ -84,6 +94,7 @@
 </div>
 
 <script src="/static/vendor/chart.umd.min.js"></script>
+<script src="/static/theme.js"></script>
 <script src="/static/stats.js"></script>
 </body>
 </html>

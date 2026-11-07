@@ -6,6 +6,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>轻松记账本</title>
+  <script>
+    // 暗色模式预加载:读样式前设置主题,避免闪白
+    document.documentElement.setAttribute("data-bs-theme", localStorage.getItem("theme") || "light");
+  </script>
   <link href="/static/vendor/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -13,9 +17,10 @@
 <nav class="navbar navbar-expand navbar-dark bg-success mb-4">
   <div class="container">
     <span class="navbar-brand mb-0 h1">📒 轻松记账本</span>
-    <ul class="navbar-nav flex-row gap-3">
+    <ul class="navbar-nav flex-row gap-3 align-items-center">
       <li class="nav-item"><a class="nav-link active" href="/">记账</a></li>
       <li class="nav-item"><a class="nav-link" href="/stats">统计</a></li>
+      <li class="nav-item"><button class="theme-btn" id="theme-btn" title="切换暗色模式">🌙</button></li>
     </ul>
   </div>
 </nav>
@@ -32,6 +37,26 @@
     <div class="col-md-4"><div class="card text-center summary-card">
       <div class="card-body"><div class="text-muted">本月结余(元)</div>
         <h4 id="sum-balance">0.00</h4></div></div></div>
+  </div>
+
+  <!-- 月度环比:支出较上月 📈/📉 -->
+  <p class="text-center text-muted mb-3" id="mom-trend" style="font-size:14px;margin-top:-10px"></p>
+
+  <!-- 本月预算进度条:80%变黄,超支变红 -->
+  <div class="card summary-card mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
+        <span class="fw-bold">🎯 本月预算</span>
+        <span class="text-muted" style="font-size:14px">
+          <span id="budget-text"></span>
+          <button class="budget-edit" id="budget-edit" title="设置预算">✏️</button>
+        </span>
+      </div>
+      <div class="progress budget-progress">
+        <div class="progress-bar" id="budget-bar" style="width:0%"></div>
+      </div>
+      <div class="text-muted mt-1" id="budget-hint" style="font-size:13px"></div>
+    </div>
   </div>
 
   <div class="row g-4">
@@ -98,6 +123,7 @@
   </div>
 </div>
 
+<script src="/static/theme.js"></script>
 <script src="/static/main.js"></script>
 </body>
 </html>

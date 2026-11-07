@@ -75,5 +75,34 @@ def api_export_csv():
     return send_file(path, as_attachment=True, download_name="records.csv")
 
 
+@app.route("/api/budget", methods=["GET"])
+def api_budget():
+    # 月度预算进度(亮点④):预算/本月已花/百分比,前端画进度条
+    spent = report.summary()["expense"]
+    budget = storage.load_budget()
+    percent = round(spent / budget * 100, 1) if budget > 0 else 0
+    return jsonify({"budget": budget, "spent": spent, "percent": percent})
+
+
+@app.route("/api/budget", methods=["POST"])
+def api_set_budget():
+    # 设置本月预算,非法值直接拒绝并给原因
+    data = request.get_json(silent=True) or {}
+    try:
+        amount = float(data.get("amount", 0))
+    except (TypeError, ValueError):
+        return jsonify({"ok": False, "msg": "预算必须是数字"})
+    if amount <= 0:
+        return jsonify({"ok": False, "msg": "预算必须大于0"})
+    storage.save_budget(amount)
+    return jsonify({"ok": True, "msg": "预算已设置为 ¥%.2f" % amount})
+
+
+@app.route("/api/trend")
+def api_trend():
+    # 月度环比(亮点):本月支出 vs 上月,前端画 📈/📉
+    return jsonify(report.trend())
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
