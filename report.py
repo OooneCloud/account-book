@@ -104,3 +104,17 @@ def stats(args):
             "items": [{"key": key, "total": _money(groups[key][0]),
                        "count": groups[key][1]} for key in ordered]}
 
+
+def summary():
+    """Return this calendar month's income, expense and balance in local time."""
+    month = date.today().isoformat()[:7]
+    income, expense = Decimal("0"), Decimal("0")
+    for row in _load_records():
+        if row["date"][:7] != month:
+            continue
+        if row["type"] == "income":
+            income += _amount(row["amount"], "record amount")
+        elif row["type"] == "expense":
+            expense += _amount(row["amount"], "record amount")
+    return {"month": month, "income": _money(income),
+            "expense": _money(expense), "balance": _money(income - expense)}
