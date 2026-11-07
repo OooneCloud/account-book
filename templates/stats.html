@@ -1,14 +1,89 @@
 <!DOCTYPE html>
-<!-- 占位统计页:请成员F(王清源)直接覆盖本文件,接口见 app.py / 00-总览文档 -->
+<!-- stats.html — 前端统计页(成员F 王清源)
+     筛选栏 + 两张 Chart.js 图表(类别占比环形图 / 每日收支对比柱状图)+ 明细表 -->
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>统计 - 轻松记账本</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <h1>📊 收支统计</h1>
-  <p>统计页开发中——成员F请用 Chart.js 实现类别占比环形图 + 每日收支柱状图。</p>
-  <p>接口:<code>GET /api/stats?start=&amp;end=&amp;type=&amp;group=category|date&amp;min_amount=&amp;max_amount=&amp;category=</code></p>
-  <a href="/">← 返回记账页</a>
+<nav class="navbar navbar-expand navbar-dark bg-success mb-4">
+  <div class="container">
+    <span class="navbar-brand mb-0 h1">📒 轻松记账本</span>
+    <ul class="navbar-nav flex-row gap-3">
+      <li class="nav-item"><a class="nav-link" href="/">记账</a></li>
+      <li class="nav-item"><a class="nav-link active" href="/stats">统计</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- 筛选栏:条件变化即重新查询并刷新图表 -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body row g-2 align-items-end">
+      <div class="col-6 col-md-2">
+        <label class="form-label">开始日期</label>
+        <input type="date" class="form-control" id="start">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">结束日期</label>
+        <input type="date" class="form-control" id="end">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">类型</label>
+        <select class="form-select" id="type">
+          <option value="all">全部</option>
+          <option value="expense">支出</option>
+          <option value="income">收入</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">金额下限</label>
+        <input type="number" class="form-control" id="min-amount" min="0" step="0.01" placeholder="不限">
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label">金额上限</label>
+        <input type="number" class="form-control" id="max-amount" min="0" step="0.01" placeholder="不限">
+      </div>
+      <div class="col-6 col-md-2 d-grid">
+        <button class="btn btn-success" id="refresh-btn">刷新统计</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-muted" id="stat-desc">当前统计:全部类型 · 共0笔 · 合计0.00元</p>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card shadow-sm"><div class="card-body">
+        <canvas id="pie" width="300" height="300"></canvas>
+      </div></div>
+    </div>
+    <div class="col-lg-7">
+      <div class="card shadow-sm"><div class="card-body">
+        <canvas id="bar" width="600" height="300"></canvas>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm my-4">
+    <div class="card-header bg-white fw-bold">类别明细</div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr><th>类别/日期</th><th class="text-end">金额(元)</th>
+              <th class="text-end">笔数</th><th class="text-end">占比</th></tr>
+        </thead>
+        <tbody id="stat-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="/static/stats.js"></script>
 </body>
 </html>
