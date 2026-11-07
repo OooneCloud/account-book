@@ -1,0 +1,23 @@
+/* style.css — 全站样式(成员E 谢玲洁 / 成员F 王清源共用) */
+body {
+  background-color: #f6f8f7;
+}
+
+.summary-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.summary-card h4 {
+  margin: 0;
+  font-weight: 700;
+}
+
+.card-header {
+  border-bottom: none;
+}
+
+.table td {
+  vertical-align: middle;
+}
