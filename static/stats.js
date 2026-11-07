@@ -131,6 +131,7 @@ async function renderTrend() {
       }))
     },
     options: {
+      maintainAspectRatio: false,   // 与另外两张图统一等高风格
       plugins: { title: { display: true, text: `${startStr} ~ ${endStr} 收支趋势` } },
       scales: {
         x: { ticks: { maxTicksLimit: 10, autoSkip: true } },
