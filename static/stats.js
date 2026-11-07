@@ -20,6 +20,16 @@ function queryFor(extra = {}) {
   return params.toString();
 }
 
+// 日期框自定义占位提示:没选日期时显示"年/月/日",选了就隐藏
+function bindDatePlaceholder(id) {
+  const input = document.getElementById(id);
+  const wrap = input.closest(".date-wrap");
+  const sync = () => wrap.classList.toggle("empty", !input.value);
+  input.addEventListener("input", sync);
+  input.addEventListener("change", sync);
+  sync();
+}
+
 async function fetchStats(extra = {}) {
   const res = await fetch("/api/stats?" + queryFor(extra));
   return res.json();
@@ -116,5 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("refresh-btn").addEventListener("click", refreshAll);
   ["start", "end", "type", "min-amount", "max-amount"].forEach(id =>
     document.getElementById(id).addEventListener("change", refreshAll));
+  bindDatePlaceholder("start");
+  bindDatePlaceholder("end");
   refreshAll();
 });

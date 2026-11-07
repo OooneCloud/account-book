@@ -98,3 +98,62 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSummary();
   loadRecent();
 });
+
+// ---------- 新增功能:月度环比 / 预算进度条 / 暗色模式 ----------
+
+// 月度环比:支出较上月 📈/📉
+async function loadTrend() {
+  const t = await (await fetch("/api/trend")).json();
+  const el = document.getElementById("mom-trend");
+  if (!el) return;
+  if (t.change_percent === null) {
+    el.textContent = "上月暂无支出,暂无环比";
+    return;
+  }
+  const up = t.change_percent > 0;
+  el.textContent = `本月支出较上月 ${up ? "↑" : "↓"} ${Math.abs(t.change_percent)}%`;
+}
+
+// 本月预算进度条:<80%绿,80%~100%黄,超支红
+async function loadBudget() {
+  const b = await (await fetch("/api/budget")).json();
+  const bar = document.getElementById("budget-bar");
+  if (!bar) return;
+  bar.style.width = Math.min(b.percent, 100) + "%";
+  bar.className = "progress-bar " +
+    (b.percent >= 100 ? "bg-danger" : b.percent >= 80 ? "bg-warning" : "bg-success");
+  document.getElementById("budget-text").textContent =
+    `已花 ¥${b.spent.toFixed(2)} / ¥${b.budget.toFixed(2)}`;
+  const hint = document.getElementById("budget-hint");
+  if (b.percent >= 100) {
+    hint.textContent = "⚠️ 本月已超支,剁手前先冷静一下!";
+  } else if (b.percent >= 80) {
+    hint.textContent = `⚡ 预算快用完了,只剩 ¥${(b.budget - b.spent).toFixed(2)}`;
+  } else {
+    hint.textContent = `还剩 ¥${(b.budget - b.spent).toFixed(2)} 可花,已用 ${b.percent}%`;
+  }
+}
+
+// 点击✏️修改预算
+function bindBudgetEdit() {
+  const btn = document.getElementById("budget-edit");
+  if (!btn) return;
+  btn.addEventListener("click", async () => {
+    const cur = (await (await fetch("/api/budget")).json()).budget;
+    const input = prompt("设置本月预算金额(元):", cur);
+    if (input === null) return;   // 用户取消
+    const res = await (await fetch("/api/budget", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: parseFloat(input) })
+    })).json();
+    alert(res.msg);
+    loadBudget();
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadTrend();
+  loadBudget();
+  bindBudgetEdit();
+});

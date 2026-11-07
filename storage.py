@@ -95,6 +95,37 @@ def export_csv():
     return CSV_FILE
 
 
+# ---------- 月度预算(亮点④:预算管理) ----------
+
+BUDGET_FILE = os.path.join(DATA_DIR, "budget.json")
+DEFAULT_BUDGET = 2000.0
+
+
+def load_budget():
+    # 读取本月预算;未设置或文件损坏时用默认值,保证功能永远可用
+    if not os.path.exists(BUDGET_FILE):
+        return DEFAULT_BUDGET
+    try:
+        with open(BUDGET_FILE, "r", encoding="utf-8") as f:
+            return float(json.load(f).get("amount", DEFAULT_BUDGET))
+    except (json.JSONDecodeError, OSError, ValueError):
+        return DEFAULT_BUDGET
+
+
+def save_budget(amount):
+    # 保存预算:只接受大于0的数字,由调用方先做提示
+    try:
+        amount = float(amount)
+    except (TypeError, ValueError):
+        return False
+    if amount <= 0:
+        return False
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(BUDGET_FILE, "w", encoding="utf-8") as f:
+        json.dump({"amount": amount}, f, ensure_ascii=False)
+    return True
+
+
 if __name__ == "__main__":
     # 自测块:python storage.py 直接跑,验证读写闭环
     # 1) 空数据首次运行

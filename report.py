@@ -69,3 +69,23 @@ def summary():
     income = round(sum(r["amount"] for r in rows if r["type"] == "income"), 2)
     expense = round(sum(r["amount"] for r in rows if r["type"] == "expense"), 2)
     return {"income": income, "expense": expense, "balance": round(income - expense, 2)}
+
+
+def trend():
+    # 月度环比:本月支出对比上月,前端画成 📈/📉 箭头(亮点)
+    today = datetime.date.today()
+    this_prefix = today.strftime("%Y-%m")
+    last_month = datetime.date(today.year - 1, 12, 1) if today.month == 1 \
+        else datetime.date(today.year, today.month - 1, 1)
+    last_prefix = last_month.strftime("%Y-%m")
+
+    rows = storage.load_records()
+    this_expense = sum(r["amount"] for r in rows
+                       if r["type"] == "expense" and r["date"].startswith(this_prefix))
+    last_expense = sum(r["amount"] for r in rows
+                       if r["type"] == "expense" and r["date"].startswith(last_prefix))
+    # 上月没花过钱就没有可比性,返回 None 让前端显示占位文案
+    change = round((this_expense - last_expense) / last_expense * 100, 1) if last_expense > 0 else None
+    return {"this_month": round(this_expense, 2),
+            "last_month": round(last_expense, 2),
+            "change_percent": change}
