@@ -36,27 +36,46 @@ async function fetchStats(extra = {}) {
   return res.json();
 }
 
-// 支出类别占比环形图(类型=收入时改为收入占比)
+// 支出类别占比环形图;类型=全部时改为收入/支出两大块对比,不细分
 async function renderPie() {
-  const type = document.getElementById("type").value === "income" ? "income" : "expense";
+  const type = document.getElementById("type").value;
+  if (type === "all") {
+    // 汇总口径:只对比支出、收入总额
+    const [exp, inc] = await Promise.all([
+      fetchStats({ group: "category", type: "expense" }),
+      fetchStats({ group: "category", type: "income" })
+    ]);
+    const data = {
+      total: exp.total + inc.total,
+      count: exp.count + inc.count,
+      items: [
+        { key: "支出", total: exp.total, count: exp.count },
+        { key: "收入", total: inc.total, count: inc.count }
+      ]
+    };
+    drawPie(data, "支出 / 收入对比", ["#ef5350", "#66bb6a"]);
+    return data;
+  }
   const data = await fetchStats({ group: "category", type });
+  drawPie(data, (type === "expense" ? "支出" : "收入") + "构成占比");
+  return data;
+}
+
+// 画环形图:labels/datasets/标题/配色由调用方决定
+function drawPie(data, title, colors) {
+  const palette = colors || ["#ef5350","#ab47bc","#5c6bc0","#29b6f6",
+                             "#26a69a","#ffca28","#8d6e63"];
   if (charts.pie) charts.pie.destroy();
   charts.pie = new Chart(document.getElementById("pie"), {
     type: "doughnut",
     data: {
       labels: data.items.map(x => x.key),
-      datasets: [{
-        data: data.items.map(x => x.total),
-        backgroundColor: ["#ef5350","#ab47bc","#5c6bc0","#29b6f6",
-                          "#26a69a","#ffca28","#8d6e63"]
-      }]
+      datasets: [{ data: data.items.map(x => x.total), backgroundColor: palette }]
     },
-  options: {
-    maintainAspectRatio: false,   // 填满固定高度的容器,和柱状图保持等高
-    plugins: {
-      title: { display: true, text: (type === "expense" ? "支出" : "收入") + "构成占比" }
+    options: {
+      maintainAspectRatio: false,   // 填满固定高度的容器,和柱状图保持等高
+      plugins: { title: { display: true, text: title } }
     }
-  }
   });
   return data;
 }
