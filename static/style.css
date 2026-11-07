@@ -95,3 +95,11 @@ body {
   --bs-btn-active-border-color: #27692b;
   color: #fff;
 }
+
+/* ---------- 统计页:两张图表容器等高 ---------- */
+.chart-card { display: flex; flex-direction: column; }
+.chart-box {
+  position: relative;
+  flex: 1;
+  min-height: 320px;   /* 两张图共用同一高度基准 */
+}
